@@ -1,0 +1,691 @@
+/// Yeti standard library
+
+/*
+ * Copyright (c) 2008,2009 Madis Janson
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+module yeti.lang.std;
+
+import java.lang.IllegalArgumentException;
+import java.util.regex.Pattern;
+import java.util.Map;
+
+class FailureException(String what)
+    extends RuntimeException(what)
+end;
+
+/// struct inner bindings are non-polymorphic
+array l is list?<'a> -> array<'a> =
+    new MList(l) unsafely_as array<'a>;
+
+fold f is ('a -> 'b -> 'a) -> 'a -> list?<'b> -> 'a =
+   (f2 v l is 'a -> list?<'b> -> 'a = // hack to get good code for gc
+        if nullptr? l then
+            v
+        else
+            (l unsafely_as ~AList)#fold(f, v) unsafely_as 'a
+        fi;
+    f2);
+
+find f l is ('a -> boolean) -> list?<'a> -> list<'a> =
+    if nullptr? l then
+        []
+    else
+        (l unsafely_as ~AList)#find(f) unsafely_as list<'a>
+    fi;
+
+index v l is 'a -> list?<'a> -> number =
+    if nullptr? l then
+        -1
+    else
+        res = (l unsafely_as ~AList)#index(v);
+        if nullptr? res then -1 else res fi
+    fi;
+
+keys h is hash<'a, 'b> -> list<'a> =
+    if empty? h then
+        []
+    else
+        new MList((h unsafely_as ~Map)#keySet()#toArray())
+            unsafely_as list<'a>
+    fi;
+
+hash l is list?<'a> -> hash<'a, ()> =
+   (h = [:];
+    for l (_ i = h.[i] := ());
+    h);
+
+/// Returns [f(a), f(b), ...] for list l [a, b, ...]
+/// This map function returns lazy list when used on normal lists.
+/// Arrays and lists backed by arrays are mapped strictly.
+map f l is ('a -> 'b) -> list?<'a> -> list<'b> =
+    if empty? l then
+        []
+    else
+        (l unsafely_as ~AList)#map(f) unsafely_as list<'b>
+    fi;
+
+/// Strict mapping of list. map' is usually faster than map on lists,
+/// unless huge streams are processed or most of the resulting list is
+/// not used. They work identically on arrays.
+map' f l is ('a -> 'b) -> list?<'a> -> list<'b> =
+    if empty? l then
+        []
+    else
+        (l unsafely_as ~AList)#smap(f) unsafely_as list<'b>
+    fi;
+
+peekObject object =
+   (o = object unsafely_as ~Object;
+    if nullptr? o then
+        List []
+    elif o instanceof String then
+        String (o unsafely_as string)
+    elif o instanceof Num then
+        Number (o unsafely_as number)
+    elif o instanceof Boolean then
+        Boolean (o unsafely_as boolean)
+    elif o instanceof AList then
+        List (map peekObject (o unsafely_as list<'a>))
+    elif o instanceof ByKey then
+        result = [:];
+        i = (o unsafely_as ~Map)#entrySet()#iterator();
+        i#hasNext() loop
+           (e = i#next() unsafely_as ~java.util.Map$Entry;
+            result.[peekObject (e#getKey() unsafely_as 'a)] :=
+                peekObject (e#getValue() unsafely_as 'a));
+        Hash result
+    elif o instanceof Struct then
+        st = o unsafely_as ~Struct;
+        fields = map' (_ n = st#name(n)) [0 .. st#count() - 1];
+        Struct {
+            fields,
+            value name =
+                i = (fields unsafely_as ~AList)#index(name);
+                if nullptr? i then
+                    throw new NoSuchKeyException("No such field (\(name))")
+                fi;
+                peekObject (st#get(i) unsafely_as 'a)
+        }
+    elif o instanceof Tag then
+        t = o unsafely_as ~Tag;
+        Variant {tag = t#name, value = peekObject (t#value unsafely_as 'a)}
+    else
+        Object o
+    fi);
+
+plus a b = a + b;
+
+{
+    none = None (),
+
+    /// identity function (I combinator)
+    id x = x,
+
+    /// constant function (K combinator)
+    const x _ = x,
+
+    apply arg f = f arg,
+    at h k = h.[k],
+
+    /// f g x y = f (g x) (g y)
+    /// for example sort (on (<) (.name)) list
+    on f g is ('a -> 'a -> 'b) -> ('c -> 'a) -> 'c -> 'c -> 'b =
+        new On(f, g) unsafely_as 'a, 
+
+    /// functions for standard operators
+
+    /// boolean logic
+    norec (not) v = not v,
+    norec (and) a b = a and b,
+    norec (or) a b = a or b,
+
+    /// element a in hash b
+    norec (in) a b = a in b,
+
+    /// comparision operators
+    norec (==) a b = a == b,
+    norec (!=) a b = a != b,
+    norec (<)  a b = a <  b,
+    norec (<=) a b = a <= b,
+    norec (>)  a b = a >  b,
+    norec (>=) a b = a >= b,
+
+    /// arithmetic operators
+    norec (+)      = plus,
+    norec (-)  a b = a - b,
+    norec (*)  a b = a * b,
+    norec (/)  a b = a / b,
+    norec (%)  a b = a % b,
+
+    /// function composition - (f . g) x is same as f (g x)
+    norec (.)  a b = a . b,
+
+    /// list constructor a :: [b, c] is same as [a, b, c]
+    norec (::) v l = v :: l,
+
+    /// lazy list constructor a :. \[b] is same as [a, b], but the second
+    /// lambda is invoked only when the tail is accessed for the first time.
+    norec (:.) v l = v :. l,
+
+    /// regex match, like s =~ '\d' to check whether string s contains number
+    norec (=~) s p = s =~ p,
+
+    /// negated regex match: s !~ p is same as not (s =~ p)
+    norec (!~) s p = s !~ p,
+
+    /// integer operations (when arguments are rational or floating numbers,
+    /// then only the integer part of argument is used))
+    norec (div) a b = a div b,
+    norec (shl) a b = a shl b,
+    norec (shr) a b = a shr b,
+    norec (xor) a b = a xor b,
+    norec (b_or) a b = a b_or b,
+    norec (b_and) a b = a b_and b,
+
+    /// negate a = -a
+    norec negate a = negate a,
+
+    /// Low-level nullpointer check.
+    /// Use defined? instead, as nullptr? may behive unexpectedly together
+    /// with some conversions done by yeti.
+    norec nullptr? a = nullptr? a,
+
+    /// checks whether value is defined
+    norec defined? a = defined? a,
+
+    /// Check whether a collection is empty one.
+    norec empty? a = empty? a,
+
+    /// First element of list or array.
+    norec head a = head a,
+
+    /// Rest of the list or array.
+    norec tail a = tail a,
+
+    /// Identity check - whether a and b are reference to same object.
+    norec same? a b = same? a b,
+
+    /// For every element of l call f with given element as argument.
+    norec for l f = for l f,
+
+    /// Acquires a mutual-exclusion lock on behalf of the executing thread,
+    /// applies block to (), then releases the lock.
+    norec synchronized monitor block = synchronized monitor block,
+
+    /// String concatenation
+    (^) a b = "\(a)\(b)",
+
+    /// List/array concatenation
+    (++) a b is list?<'a> -> list?<'a> -> list<'a> =
+        if empty? a then
+            b unsafely_as ~Object unsafely_as 'a
+        elif empty? b then
+            a unsafely_as ~Object unsafely_as 'a
+        else
+            new ConcatList(a, b) unsafely_as list<'a>
+        fi,
+
+    /// damn struct polymorphism restriction. is it really needed?
+    array, fold, find, index, keys, hash, map, map', peekObject,
+
+    /// Wraps Java array object into Yeti array type.
+    wrapArray a is 'a[] -> array<'a> = a,
+
+    /// Gives values from collection a as a list.
+    list a is map<'k, 'a> -> list<'a> =
+        if empty? a then
+            []
+        else
+            (a unsafely_as ~Coll)#asList() unsafely_as list<'a>
+        fi,
+
+    /// Swaps elements with keys i and j in mapping a
+    swapAt a i j =
+        x = a.[i];
+        a.[i] := a.[j];
+        a.[j] := x,
+
+    /// Applies function to two arguments in reversed order.
+    /// Useful for swapping binary functions arguments.
+    flip f x y =
+        f y x,
+
+    /// Make function f to be memoizing.
+    lazy f is (() -> 'a) -> (() -> 'a) =
+        new Lazy(f) unsafely_as (() -> 'a),
+
+    /// Construct a pair structure.
+    pair fst snd =
+        {fst, snd},
+
+    /// Convert any value into string representation
+    string x =
+        "\(x)",
+
+    /// Convert string into number
+    number x =
+        Core#parseNum(x is string unsafely_as ~String),
+
+    /// Numeric functions
+    min a b =
+        if a < b then a else b fi,
+    max a b =
+        if a > b then a else b fi,
+    abs a =
+        if a < 0 then -a else a fi,
+    sum l =
+        fold plus 0 l,
+
+    /// Flatten a list of lists.
+    concat l is list?<list?<'a>> -> list<'a> =
+        if empty? l then
+            []
+        else
+            ConcatLists#concat(l) unsafely_as list<'a>
+        fi,
+
+    /// Basically concat . map, but more effective.
+    concatMap f l is ('a -> list?<'b>) -> list?<'a> -> list<'b> =
+        if empty? l then
+            []
+        else
+            concat ((l unsafely_as ~AList)#map(f) unsafely_as list<'a>)
+        fi,
+
+    /// Is predicate f true for any element of list l?
+    any f l =
+        not nullptr? (find f l),
+
+    /// Is predicate f true for all elements of list l?
+    all f l =
+        nullptr? (find (_ x = not f x) l),
+
+    /// Returns first element of l for which predicate f is false
+    /// or last element, when f returns false for all elements of l.
+    avoid f l is ('a -> boolean) -> list?<'a> -> 'a =
+        if empty? l then
+            throw new IllegalArgumentException("prefer: empty list")
+        fi;
+        var i = l unsafely_as ~AIter;
+        var value = () as ~Object;
+        (value := i#first();
+         i := i#next();
+         not nullptr? i and f (value unsafely_as 'a)) loop;
+        value unsafely_as 'a,
+
+    /// Whether l contains element equal (as defined by (==)) to v
+    contains v l is 'a -> list?<'a> -> boolean =
+        not (nullptr? l or nullptr? (l unsafely_as ~AList)#index(v)),
+
+    /// Returns default when opt == None () and f x when opt == Some x
+    maybe default f opt =
+        case opt of
+        Some v: f v;
+        None _: default;
+        esac,
+
+    /// Splits given list into two parts, putting elements from the start of the
+    /// list into fst as long as predicate function pred is false for the given
+    /// element. The rest of the list is returned as snd.
+    splitBy pred list is ('a -> boolean) -> list<'a>
+                          -> { fst is list<'a>, snd is list<'a> } = 
+        a = new MList();
+        var l = list; // over-optimized loop from hell. don't code like that.
+        not empty? l and (h = head l; not pred h and (a#add(h); true)) loop
+            l := tail l;
+        { fst = if a#isEmpty() then [] else a unsafely_as list<'a> fi,
+          snd = l },
+
+    /// Splits given list into two parts, returning first n elements as fst
+    /// and the rest as snd.
+    splitAt n list is number -> list<'a>
+                      -> { fst is list<'a>, snd is list<'a> } =
+        a = new MList();
+        var l = list;
+        var n = n;
+        if n < 256 then
+            a#reserve(n)
+        fi;
+        n > 0 and not empty? l loop
+           (a#add(head l);
+            l := tail l;
+            n := n - 1);
+        { fst = if a#isEmpty() then [] else a unsafely_as list<'a> fi,
+          snd = l },
+
+    /// Take first n elements from list l
+    take n l is number -> list?<'a> -> list<'a> =
+        if nullptr? l then
+            []
+        else
+            TakeList#take(l, n) unsafely_as list<'a>
+        fi,
+
+    /// Drop first n elements from list l. Won't copy the returned tail.
+    drop n l =
+        if n <= 0 then
+            l
+        elif empty? l then
+            []
+        else
+            drop (n - 1) (tail l)
+        fi,
+
+    /// Take elements from the start of list l while predicate pred
+    /// is true on the element.
+    takeWhile pred l is ('a -> boolean) -> list<'a> -> list<'a> =
+        if empty? l then
+            []
+        else
+            TakeWhile#take(l, pred) unsafely_as list<'a>
+        fi,
+
+    /// Returns infinite list [x, f(x), f(f(x)), f(f(f(x))), ...]
+    iterate f x is ('a -> 'a) -> 'a -> list<'a> =
+        new Iterate(x, f) unsafely_as list<'a>,
+
+    /// Removes duplicate elements from the list.
+    /// The ordering of list is not preserved.
+    nub is list?<'a> -> list<'a> =
+        keys . hash,
+    
+    /// Returns a list of lists, where each sublist contains only equal elements
+    /// and the concatenation of the result is equal to the original list l.
+    /// Elements are considered equal when the given predicate function
+    /// eq is true for them.
+    groupBy eq l is ('a -> 'a -> boolean) -> list?<'a> -> list<list<'a>> =
+        if empty? l then
+            []
+        else // this is an example of over-optimisation ;)
+            var result = new MList();
+            var collector = new MList();
+            var i = l unsafely_as ~AIter;
+            var prev = i#first();
+            collector#add(prev);
+            (i := i#next(); not nullptr? i) loop
+               (val = i#first();
+                if not ((val unsafely_as 'a) `eq` (prev unsafely_as 'a)) then
+                    result#add(collector);
+                    collector := new MList()
+                fi;
+                prev := val;
+                collector#add(val));
+            result#add(collector);
+            result unsafely_as 'l
+        fi,
+
+    /// Sorts list. Same as sortBy (<) l
+    sort l is list?<^a> -> list<^a> =
+        if empty? l then
+            []
+        else
+            (l unsafely_as ~AList)#sort() unsafely_as list<^a>
+        fi,
+
+    /// Sorts list using given less? predicate function to determine the order.
+    /// Merge sort algorithm is used.
+    sortBy less? l is ('a -> 'a -> boolean) -> list?<'a> -> list<'a> =
+        if empty? l then
+            []
+        else
+            (l unsafely_as ~AList)#sort(less?) unsafely_as list<'a>
+        fi,
+
+    // few math functions
+    pi = Math#PI,
+    ln a = Math#log(a),
+    exp a = Math#exp(a),
+    cos a = Math#cos(a),
+    sin a = Math#sin(a),
+    tan a = Math#tan(a),
+    acos a = Math#acos(a),
+    asin a = Math#asin(a),
+    atan a = Math#atan(a),
+    sqrt a = Math#sqrt(a),
+    int a is number -> number = (a as ~java.lang.Number)#longValue(),
+
+    /// Replaces occurences of needle in the haystack with replacement
+    strReplace needle replacement haystack =
+        Core#replace(needle, replacement, haystack),
+
+    /// String length
+    norec strLength s = strLength s,
+
+    /// String to upper case
+    norec strUpper s = strUpper s,
+
+    /// String to lower case
+    norec strLower s = strLower s,
+
+    /// Remove whitespace from start and end of the string
+    norec strTrim s = strTrim s,
+
+    /// Slice of the string
+    norec strSlice s start end = strSlice s start end,
+
+    /// Same as strSlice s pos (strLength s)
+    norec strRight s pos = strRight s pos,
+
+    /// Does the string s starts with string start?
+    norec strStarts? s start = strStarts? s start,
+
+    /// Does the string s ends with string end?
+    norec strEnds? s end = strEnds? s end,
+
+    /// Get an index of the needle substring in the haystack.
+    /// Starts searching from index from
+    norec strIndexOf haystack needle from = strIndexOf haystack needle from,
+
+    /// Get an index of the needle substring in the haystack.
+    /// Starts searching backwards from index from
+    norec strLastIndexOf haystack needle from =
+            strLastIndexOf haystack needle from,
+
+    /// Same as strLastIndexOf haystack needle (strLength haystack)
+    norec strLastIndexOf' haystack needle = strLastIndexOf haystack needle,
+
+    norec strSplit re = strSplit re,
+    norec substAll re = substAll re,
+    norec matchAll re = matchAll re,
+    norec like re = like re,
+    norec strChar s pos = strChar s pos,
+
+    strLeft s end = strSlice s 0 end,
+
+    strLeftOf subString s is string -> string -> string =
+        i = strIndexOf s subString 0;
+        if i < 0 then '' else strSlice s 0 i fi,
+
+    strRightOf subString s is string -> string -> string =
+        i = strLastIndexOf s subString 0;
+        if i < 0 then '' else strRight s (i + strLength subString) fi,
+
+    strJoin sep list is string -> list?<'a> -> string =
+        if empty? list then
+            ""
+        else
+            buf = new java.lang.StringBuffer("\(head list)");
+            var l = tail list;
+            if strLength sep == 0 then
+                not nullptr? l loop
+                   (buf#append("\(head l)");
+                    l := tail l)
+            else
+                not nullptr? l loop
+                   (buf#append(sep);
+                    buf#append("\(head l)");
+                    l := tail l)
+            fi;
+            buf#toString()
+        fi,
+
+    strPad pad n str is string -> number -> string -> string =
+        if strLength str >= n then
+            str
+        else
+            buf = new java.lang.StringBuffer(str);
+            buf#length() < n loop buf#append(pad);
+            buf#toString()
+        fi,
+
+    strCapitalize str is string -> string =
+        Core#capitalize(str unsafely_as ~String),
+
+    strUncapitalize str is string -> string =
+        Core#uncapitalize(str unsafely_as ~String),
+
+    forHash h f is hash<'a, 'b> -> ('a -> 'b -> ()) -> () =
+        i = (h unsafely_as ~Map)#entrySet()#iterator();
+        i#hasNext() loop
+           (e = i#next() unsafely_as ~java.util.Map$Entry;
+            f (e#getKey() unsafely_as 'a) (e#getValue() unsafely_as 'b)),
+
+    mapHash f h is ('a -> 'b -> 'c) -> hash<'a, 'b> -> list?<'c> =
+        a = new MList();
+        a#reserve((h unsafely_as ~Map)#size());
+        i = (h unsafely_as ~Map)#entrySet()#iterator();
+        i#hasNext() loop
+           (e = i#next() unsafely_as ~java.util.Map$Entry;
+            a#add(f (e#getKey() unsafely_as 'a)
+                    (e#getValue() unsafely_as 'b)));
+        a unsafely_as list?<'c>,
+
+    identityHash () is () -> hash<'a, 'b> =
+        new IdentityHash() unsafely_as hash<'a, 'b>,
+
+    copy h is 'a -> 'a =
+        if nullptr? h then
+            () as ~Object unsafely_as 'a
+        else
+            (h is map<'a, 'b> unsafely_as ~Coll)#copy() unsafely_as map<'a, 'b>
+        fi,
+
+    failWith message =
+        throw new FailureException(message),
+
+    delete h k is map<'a, 'b> -> 'a -> () =
+        _ = (h unsafely_as ~ByKey)#remove(k),
+
+    deleteAll h ks is map<'a, 'b> -> list?<'a> -> () =
+        _ = (h unsafely_as ~ByKey)#removeAll(ks),
+
+    setHashDefault h f is hash<'a, 'b> -> ('a -> 'b) -> () =
+        (h unsafely_as ~ByKey)#setDefault(f),
+
+    clearHash h is hash<'a, 'b> -> () =
+        (h unsafely_as ~Map)#clear(),
+
+    insertHash h h' is hash<'a, 'b> -> hash<'a, 'b> -> () =
+        _ = (h unsafely_as ~Map)#putAll(h' unsafely_as ~Map),
+
+    length l is map<'a, 'b> -> number =
+        if nullptr? l then
+            0
+        else
+            (l unsafely_as ~Coll)#length()
+        fi,
+
+    setArrayCapacity a n is array<'a> -> number -> () =
+        (a unsafely_as ~MList)#reserve(n),
+
+    shift a is array<'a> -> 'a =
+        (a unsafely_as ~MList)#shift() unsafely_as 'a,
+
+    pop a is array<'a> -> 'a =
+        (a unsafely_as ~MList)#pop() unsafely_as 'a,
+
+    push a v is array<'a> -> 'a -> () =
+        (a unsafely_as ~MList)#add(v),
+
+    slice a start end is array<'a> -> number -> number -> array<'a> =
+        (a unsafely_as ~MList)#copy(start, end) unsafely_as array<'a>,
+
+    collect f a endPred is ('a -> 'b) -> 'a -> ('b -> boolean) -> list<'b> =
+       (l = new MList();
+        (v = f a; not endPred v and (l#add(v); true)) loop;
+        if l#isEmpty() then
+            []
+        else
+            l unsafely_as list<'a>
+        fi),
+
+    filter f l is ('a -> boolean) -> list?<'a> -> list<'a> =
+        if empty? l then
+            []
+        else
+            FilterList#filter(l, f) unsafely_as list<'a>
+        fi,
+
+    catSome l is list?<Some 'a | None 'b> -> list<'a> =
+        if empty? l then
+            []
+        else
+            CatSomes#filter(l) unsafely_as list<'a>
+        fi,
+
+    map2 f a b is ('a -> 'b -> 'c) -> list?<'a> -> list?<'b> -> list<'c> =
+        if empty? a or empty? b then
+            []
+        else
+            new Map2List(f, a, b) unsafely_as list<'c>
+        fi,
+
+    revAppend a b is list?<'a> -> list<'a> -> list<'a> =
+        if empty? a then
+            b
+        else
+            var a = a unsafely_as ~AIter;
+            var res = b;
+            not nullptr? a loop
+               (res := (a#first() unsafely_as 'a) :: res;
+                a := a#next());
+            res
+        fi,
+
+    reverse l is list?<'a> -> list<'a> =
+        if nullptr? l then
+            []
+        else
+            (l unsafely_as ~AList)#reverse() unsafely_as list<'a>
+        fi,
+
+    /// Provide return function for block.
+    /// Be careful with lazy lists, for example
+    /// withExit do e: 1 :. \(e []) done
+    /// fails with exit out scope error..
+    withExit f is (('a -> 'b) -> 'a) -> 'a =
+        EscapeFun#with(f) unsafely_as 'a,
+
+    threadLocal initialValue is 'a -> {var value is 'a} =
+        class Local extends java.lang.ThreadLocal
+            Object initialValue() initialValue
+        end;
+        tl = new Local();
+        {
+            get value () = tl#get() unsafely_as 'a,
+            set value v  = tl#set(v)
+        }
+}

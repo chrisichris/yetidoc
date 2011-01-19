@@ -1,0 +1,205 @@
+<project name="yetidoc" default="build" basedir=".">
+
+    <description>
+    yetidoc project build file. 
+    </description>
+
+    <!-- load environment variables as properties -->
+    <property environment="env"/>
+
+    <!-- load properties files -->
+    <property file="build.properties"/>
+
+    <!-- default folder location properties -->
+    <property name="src-dir" value="src"/>
+    <property name="tests.src-dir" value="tests"/>
+    <property name="lib-dir" value="lib"/>
+    <property name="build-dir" value="build"/>
+    <property name="testdocs-dir" value="testdocs"/>
+    <property name="testdocsrc-dir" value="testdocsrc"/>
+    <property name="dist-dir" value="dist"/>
+    <property name="doc-dir" value="${dist-dir}/javadoc" />
+	<property name="yeti.jar.file" value="${lib-dir}/yeti.jar"/>
+
+    <!-- classpath -->
+
+    <path id="project.classpath">
+        <!-- compiled classes -->
+        <pathelement location="${build-dir}" />
+        <!-- libraries -->
+        <fileset dir="${lib-dir}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+	
+	 <!-- init clean -->
+
+    <target name="init">
+        <mkdir dir="${build-dir}"/>
+        <mkdir dir="${dist-dir}"/>
+        <mkdir dir="${doc-dir}"/>
+    </target>
+
+	<target name="clean-testdocs">
+        <delete dir="${testdocs-dir}" failonerror="false" deleteonexit="true" />
+	</target>
+	
+    <target name="clean" depends="clean-testdocs" description="Delete temporary folders">
+        <delete dir="${build-dir}" failonerror="false" deleteonexit="true" />
+        <delete dir="${dist-dir}" failonerror="false" deleteonexit="true" />
+    </target>
+
+	<!-- yetic task -->	
+		
+	<target name="yetic-taskdef">
+		<taskdef name="yetic" classname="yeti.lang.compiler.YetiTask"
+			classpath="${yeti.jar.file}"/>
+	</target>
+
+
+	<!-- compile -->
+    <target name="prepare-resources" depends="init">
+    
+		<!-- Prepare application resource files" -->
+        <copy todir="${build-dir}" overwrite="true">
+            <fileset dir="${src-dir}" includes="**/*.properties,**/*.xml" excludes="" />
+        </copy>
+    </target>
+
+    <target name="compile" depends="init,yetic-taskdef,prepare-resources">
+  
+  <!-- Compile source code -->
+        <javac
+            srcdir="${src-dir}"
+            destdir="${build-dir}"
+            debug="true"
+            debuglevel="line,vars,source"
+	    includeantruntime="true"
+        >
+            <compilerarg value="-Xlint" /> <!-- "-Xlint:all", "-Xlint:all,-path", "-Xlint:all,-path,-unchecked" -->
+            <classpath refid="project.classpath" />
+        </javac>
+        <yetic srcdir="${src-dir}/org/yetidoc" destdir="${build-dir}"
+                   includes="*.yeti" excludes=""
+                   preload="yeti/lang/std:yeti/lang/io">
+            <classpath refid="project.classpath" />
+        </yetic>
+    </target>
+	
+	<!-- javadoc -->
+
+    <target name="javadoc" depends="init"
+        description="Generate Java classes documentation" >
+        <echo message="Generating javadocs to directory ${doc-dir}" />
+        <delete dir="${doc-dir}" />
+        <javadoc destdir="${doc-dir}" sourcepath="">
+            <fileset dir="${src-dir}" includes="**/*.java"/>
+            <classpath refid="project.classpath" />
+        </javadoc>
+    </target>
+	
+	<!-- tests -->
+
+    <target name="compile-tests" depends="clean-testdocs,compile">
+    <!-- description="Compile tests" -->
+        <javac
+            srcdir="${tests.src-dir}" 
+            destdir="${build-dir}"
+            debug="true"
+            debuglevel="line,vars,source"
+			includeantruntime="true"
+        >
+            <classpath refid="project.classpath" />
+        </javac>
+    </target>
+
+    <target name="console-tests" depends="clean-testdocs,compile"
+		description="Execute the org.yetidoc.yetidoc main program" >
+        <java classname="org.yetidoc.yetidoc" fork="true">
+            <arg line="${testdocsrc-dir} ${testdocs-dir}/yetidocfm -fm yetidoc" />
+            <classpath>
+               <path refid="project.classpath" />
+            </classpath>
+        </java>
+        <java classname="org.yetidoc.yetidoc" fork="true">
+            <arg line="${testdocsrc-dir} ${testdocs-dir}/yetidoc" />
+            <classpath>
+               <path refid="project.classpath" />
+            </classpath>
+        </java>
+    </target>
+	
+	
+    <target name="junit-tests" depends="clean-testdocs, compile-tests"
+        description="Run tests">
+        <junit haltonfailure="yes" fork="true">
+            <classpath refid="project.classpath" />
+            <formatter type="plain" usefile="false" />
+            <batchtest>
+                <fileset dir="${tests.src-dir}"
+                    includes="**/*Test.java">
+                </fileset>
+            </batchtest>
+        </junit>
+    </target>
+
+	<target name="yetidoc-taskdef" depends="compile">
+		<taskdef name="yetidoc" classname="org.yetidoc.YetiDocTask">
+            <classpath refid="project.classpath" />
+		</taskdef>
+	</target>
+
+	<target name="task-tests" depends="clean-testdocs, yetidoc-taskdef">
+        <yetidoc srcdir="${testdocsrc-dir}" destdir="${testdocs-dir}/anttask"
+                   frameworkname="anttask">
+            <classpath refid="project.classpath" />
+        </yetidoc>
+	</target>
+	
+	<target name="run-tests" depends="junit-tests,console-tests,task-tests">
+	</target>
+	
+	<!-- library -->
+
+    <property name="jar.rel-file" value="${dist-dir}/${ant.project.name}.jar" />
+
+    <target name="create-jar" depends="compile">
+    <!-- description="Create a jar file" -->
+        <jar destfile="${jar.rel-file}">
+            <zipfileset dir="${build-dir}"
+                        includes=""
+                        excludes="" />
+        </jar>
+    </target>
+	
+	 <!-- console -->
+
+	 
+    <property name="run.main-class" value="org.yetidoc.yetidoc"/>
+    <property name="run.args" value=""/>
+
+    <target name="execute">
+    <!-- description="Execute the program as-is - no compilation is performed" -->
+        <java classname="${run.main-class}" fork="true">
+            <arg line="${run.args}" />
+            <classpath>
+               <path refid="project.classpath" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="run" depends="build,execute"
+        description="Run the program">
+    </target>
+	
+	<!-- build -->
+
+    <target name="build" depends="compile,run-tests,create-jar"
+        description="Build the project">
+    </target>
+
+    <target name="rebuild" depends="clean,build">
+    <!-- description="Rebuild the project" -->
+    </target>
+
+</project>

@@ -1,0 +1,246 @@
+/**
+ * Yeti compiler main program.
+ * Copyright (c) 2008.2009 Madis Janson
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+program yeti.lang.compiler.yeti;
+
+import java.lang: ClassLoader, Thread;
+import java.io.File;
+
+var target = "";
+var eval = false;
+var flags = 0;
+var exec = true;
+var printType = false;
+var src = "";
+var compileErrorTrace = false;
+javaOptions = array [];
+
+srcs = array [];
+argv = array _argv;
+
+evaluator = load yeti.lang.compiler.repl argv;
+
+printMessage ex is ~Exception -> () =
+    println ex#getMessage();
+
+repl () =
+   (print "> ";
+    line = readln ();
+    if defined? line then
+        print (evaluator.evaluate line flags);
+        repl ()
+    else
+        println "";
+        sysExit 0
+    fi);
+
+startRepl () =
+   (println "Yeti REPL.\n";
+    oldEval = YetiEval#set(new YetiEval());
+    try
+        repl ()
+    finally
+        YetiEval#set(oldEval)
+    yrt);
+
+help () =
+   (println "yeti -flags... files\n\n\
+      "  -h               Print this help\n\
+      "  -e expr          Evaluate expr and print result\n\
+      "  -d directory     Compile and store the generated class files\n\
+      "                   in the given directory\n\
+      "  -cp path         Give classpath\n\
+      "  -preload modules Preload modules (: separated list)\n\
+      "  -icast           Generate superfluous casts for broken JVMs\n\
+      "  -javaver version Forces specified Java version when compiling Java\n\
+      "  -j option        Option for Javac (used when compiling Java sources)\n\
+      "  -type            Print type signature of given expression or module\n";
+    sysExit 0);
+
+splitPath = strSplit File#pathSeparator;
+
+not (eval or empty? argv) and (not exec or empty? srcs) loop
+   (arg = shift argv;
+    if arg `strStarts?` '-' then
+        case arg of
+        "-C":
+            exec := false;
+        "-d":
+            target := shift argv;
+            if target != "" then
+                push javaOptions '-d';
+                push javaOptions target;
+                target := "\(target)/"
+            fi;
+            exec := false;
+        "-e":
+            eval := true;
+            src := shift argv;
+        "-h": help ();
+        "-cp": evaluator.classPath := list (splitPath (shift argv));
+        "-help": help ();
+        "--help": help ();
+        "-preload": evaluator.preload := list (splitPath (shift argv));
+        "-type":
+            printType := true;
+            exec := false;
+        "-parse-tree": flags := flags + YetiC#CF_PRINT_PARSE_TREE;
+        "-no-import" : flags := flags + YetiC#CF_NO_IMPORT;
+        "-no-frames" : evaluator.noframes := true;
+        "-javaver":
+            ver = shift argv;
+            for ['-source', ver, '-target', ver] (push javaOptions);
+        "-j":
+            push javaOptions (shift argv);
+        "-guard":
+            time = number (shift argv);
+            _ = runThread [Daemon ()] do:
+                sleep time;
+                println "(terminated)";
+                System#exit(13)
+            done;
+        "-safe-eval":
+            evaluator.sandbox := true;
+            eval := true;
+            src := shift argv;
+        "-icast":
+            evaluator.gcj := true;
+        "-compile-error-trace":
+            compileErrorTrace := true;
+        _:
+            println "Unexpected option: \(arg)";
+            sysExit 1;
+        esac
+    else
+        push srcs arg
+    fi);
+
+if empty? srcs and not eval then
+    if exec and empty? argv then
+        startRepl ()
+    fi;
+    sysExit 0
+fi;
+
+writer =
+    if printType then
+        ()
+    elif exec then
+        new Loader()
+    else
+        new ToFile(target)
+    fi;
+
+scan src local dirs to =
+   (var ok = true;
+    if src `strEnds?` '.yeti' then
+        name = if local == '' then src else local fi;
+        // avoid duplicates, prefer shortest name
+        if not src in to or strLength to.[src] > strLength name then
+            to.[src] := name
+        fi
+    elif src `strEnds?` '.java' then
+        to.[src] := src // javac prefers full path
+    else
+        dirList = listDirectory false src;
+        ok := not empty? dirList or new File(src)#isDirectory();
+        if ok then
+            dirs src;
+        fi;
+        for dirList do {name, path}:
+            fn = if local == '' then name else "\(local)/\(name)" fi;
+            _ = scan path fn \() to
+        done
+    fi;
+    ok);
+
+compilation = evaluator.compilationOf writer;
+var resultType = YetiType#UNIT_TYPE;
+
+try
+    if eval then
+        flags := flags + YetiC#CF_EVAL;
+        resultType := compilation#compile((), evaluator.mainClass, src, flags);
+        if printType then
+            println resultType
+        fi
+    elif printType then
+        CompileCtx#currentCompileCtx#set(compilation);
+        for srcs do src:
+            mt = YetiTypeVisitor#getType((), src, true);
+            if mt#topDoc != "" then
+                println "/*\n\(mt#topDoc)\n*/"
+            fi;
+            println mt#type
+        done
+    else
+        files = [:];
+        dirs = array [];
+        for srcs do src:
+            if not scan src '' (push dirs) files then
+                println "Don't know what to do with `\(src)'";
+                sysExit 1
+            fi
+        done;
+        evaluator.reader#basedirs := dirs as ~String[];
+        evaluator.mainClass :=
+            compilation#compileAll(sort (list files), flags, javaOptions)
+    fi;
+    compilation#enumWarns(printMessage)
+catch CompileException ex:
+    compilation#enumWarns(printMessage);
+    if compileErrorTrace then
+        ex#printStackTrace()
+    fi;
+    printMessage ex;
+    sysExit 1;
+yrt;
+
+out = if evaluator.sandbox then System#out else System#err fi;
+
+if exec then
+    try
+        classLoader = writer as ~Object unsafely_as ~ClassLoader;
+        // make compiled classes visible in the thread classloader
+        Thread#currentThread()#setContextClassLoader(classLoader);
+        v = evaluator.execClass eval classLoader;
+        if resultType#deref()#type != YetiType#UNIT then
+            println v
+        fi
+    catch java.lang.StackOverflowError ex:
+        if evaluator.sandbox then
+            out#println("Stack overflow")
+        else
+            ex#printStackTrace()
+        fi
+    catch java.lang.OutOfMemoryError ex:
+        out#println("Out of memory");
+    catch Exception ex:
+        ex#printStackTrace(out);
+        sysExit 2;
+    yrt
+fi

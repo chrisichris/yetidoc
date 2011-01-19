@@ -1,0 +1,276 @@
+/*
+ * Copyright (c) 2010,2011 --chris--
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+module org.yetidoc.yetidocModuleHtml;
+
+import yeti.lang.compiler.YetiDocMaker;
+import java.lang.Character;
+
+
+(@) text =
+    (escape s =
+         "&#\(Character#codePointAt(s.[0] is string, 0));";
+     strJoin '' (matchAll '[<>&"]' escape id "\(text)"));
+
+
+moduleType mt frameworkName is ~YetiDocModuleType -> string -> 'a = {
+    frameworkName = frameworkName@,
+    javamt = mt,
+    doc = (mt#getDoc())@,
+    source = (mt#getSource())@,
+    typeString = (mt#getTypeString())@,
+    name = (mt#getName())@,
+    fileName = (mt#getFileName())@,
+    struct? = mt#isStruct(),
+
+    fields = (
+        ja = wrapArray (mt#getFields()#toArray());
+        map' do obj:
+                ft = (obj unsafely_as ~Object) unsafely_as ~YetiDocFieldType;
+                {
+                    doc = ft#getDoc()@,
+                    name = ft#getName()@,
+                    type = ft#getType()@,
+                    varField? = ft#isVarField(),
+                    displayName = if ft#isVarField() then '<span class="var-marker">var</span> ' else "" fi ^ (ft#getName()@),
+                    functionField? = ft#isFunctionField(),
+                    finalPartialMember = ft#getFinalPartialMember()@,
+                }
+             done ja;
+    ),
+};
+
+modulesNavHtml nameLinks = (
+    listr = strJoin "\n             "
+            (map do {link,name}: '<li><a href="' ^ link ^ '">' ^ name ^ '</a></li>' done nameLinks);
+
+    html =
+'       <h4>modules</h4>
+        <ul>' ^ listr ^'</ul>
+';
+    html
+);
+
+bodyDetailsSruct mt = (
+    sfs = sortBy do f1 f2 : f1.name < f2.name done mt.fields;
+    /*
+    funFields = filter do f:f.functionField? done sfs;
+    valueFields = filter do f: not f.functionField? done sfs;
+    varFields = filter do f: f.varField? done sfs;
+    */
+    fieldSumHtml header fields = if empty? fields then "" else
+        fs = strJoin ", " (map do field: '<a href="#field_' ^ field.name^'">' ^ field.displayName ^ '</a>' done fields);
+'       <h4>' ^ header ^ '</h4>
+        <p>' ^ fs ^ '</p>
+'
+    fi;
+
+    fieldDetailHtml field = (
+'        <h3><a name="field_' ^ field.name ^ '">' ^ field.displayName ^ '</a></h3>
+        <p>' ^ field.doc ^ '</p>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre><code>' ^ field.displayName ^ ' is ' ^ field.type ^ '</code></pre>
+        <hr/>
+'
+    );
+    allFieldsStr = strJoin "" (map fieldDetailHtml mt.fields);
+//    ret = (fieldSumHtml "Var fields" varFields) ^ (fieldSumHtml "Value fields" valueFields) ^ (fieldSumHtml "Function fields" funFields) ^ '
+//        <h2>Field details</h2><hr/>' ^ allFieldsStr;
+    ret = (fieldSumHtml "All Fields" sfs) ^ '
+        <h2>Field details</h2><hr/>' ^ allFieldsStr;
+    ret
+   
+);
+
+bodyDetails mt = (
+    if not mt.struct? then
+'         <h2>Module Type</h2>
+         <pre><code>' ^ mt.typeString ^ '</code></pre>
+'
+    else bodyDetailsSruct mt fi
+);
+
+bodyHtml mt = (
+    details = bodyDetails mt;
+'        <h1>'^  mt.name ^ if mt.struct? then '<span class="struct-marker"> is structure</span> ' else '' fi ^ '</h1>
+        ' ^ if mt.source == "" then 'No source available' else '<a href="#source">sourcecode</a>' fi ^ '
+        <h2>Overview</h2>
+        <p>' ^ mt.doc ^ '</p>
+' ^ details ^ if mt.source == "" then "" else '
+        <h2><a name="source">Source</a></h2>
+        <pre><code>' ^ mt.source ^ '</code></pre>
+' fi);
+
+
+
+
+htmlForModule mt sideHtml bodyHtml is 'a -> string -> string -> string = (
+'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>' ^ mt.frameworkName ^ ' - Yeti API documentation </title>
+    <style type="text/css">
+
+    body {
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    h4 {
+        margin: 0;
+    }
+
+    p {
+        margin-top: 3px;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding:0;
+    }
+
+    body{
+        margin:0;
+        padding:0;
+        line-height: 1.5em;
+    }
+
+    b{font-size: 110%;}
+    em{color: red;}
+    .var-marker {font-size: 80%; color: #666;}
+    .struct-marker {font-size: 60%; color: #666;}
+
+    pre {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -o-pre-wrap;
+        background: #faf8f0;
+    }
+
+    code {
+        display: block;
+        padding: 0.5em 1em;
+        border: 1px solid #bebab0;
+    }
+    div.codeheader {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    pre.codeheader {
+        margin-top: 3px;
+    }
+
+    #topsection{
+        background: #EAEAEA;
+        height: 90px; /*Height of top section*/
+    }
+
+    #topsection h1{
+        margin: 0;
+        padding-top: 15px;
+    }
+
+    #contentwrapper{
+        float: left;
+        width: 100%;
+    }
+
+    #contentcolumn{
+        margin-left: 200px; /*Set left margin to LeftColumnWidth*/
+        border-left: 5px solid  #EAEAEA;
+    }
+
+    #leftcolumn{
+        float: left;
+        width: 200px; /*Width of left column*/
+        margin-left: -100%;
+        margin-top: 15px;
+        
+        /*background: #C8FC98;*/
+    }
+
+    #footer{
+        clear: left;
+        width: 100%;
+        background: black;
+        color: #FFF;
+        text-align: center;
+        padding: 4px 0;
+    }
+
+    #footer a{
+        color: #FFFF80;
+    }
+
+    .innertube{
+        margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+        margin-top: 0;
+    }
+
+    </style>
+
+
+</head>
+<body>
+<div id="maincontainer">
+    <div id="topsection"><div class="innertube">
+        <h1>Yeti API documentation </h1>
+        <h2>' ^ mt.frameworkName ^'</h2>
+    </div></div>
+
+    <div id="contentwrapper"><div id="contentcolumn"><div class="innertube">
+        ' ^ bodyHtml ^ '
+    </div></div></div>
+
+    <div id="leftcolumn"><div class="innertube">
+        <!--<b>Left Column: <em>200px</em></b> <script type="text/javascript">filltext(15)</script> -->
+        ' ^ sideHtml ^ '
+    </div></div>
+
+    <div id="footer">
+        <a href="http://mth.github.com/yeti/">Yeti - home</a>
+    </div>
+</div>
+</body>
+</html>'
+
+
+);
+
+{
+    modulePageHtml mt frameworkName modulesNav = (
+        mtt = moduleType mt frameworkName;
+        bh = bodyHtml mtt; //78
+        htmlForModule mtt modulesNav bh;
+    ),
+
+    modulesNavHtml,
+
+}

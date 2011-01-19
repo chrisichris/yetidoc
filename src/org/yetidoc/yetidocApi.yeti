@@ -1,0 +1,128 @@
+///Here comes the module documentation
+
+/*
+ * Copyright (c) 2010,2011 --chris--
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+module org.yetidoc.yetidocApi;
+
+
+import yeti.lang.compiler.YetiDocMaker;
+import java.io.File;
+
+
+
+moduleHtml = load org.yetidoc.yetidocModuleHtml;
+
+findSrcs found src is list<~File> -> ~File -> list<~File> = (
+    if src#isDirectory() then
+        files = wrapArray (src#listFiles());
+        fold findSrcs found files;
+    elif strEnds? src#getName() ".yeti" then
+        src :: found;
+    else
+        found;
+    fi;
+);
+
+loadModuleTypes classpath srcDirs  srcs is list<string> -> list<string> -> list<string> -> list<~YetiDocModuleType>= (
+    arj = YetiDocMaker#docForSrcs(array srcDirs,array classpath, array srcs);
+    list (wrapArray arj)
+);
+
+writeDocFor classpathA srcDirsA srcsA targetDir frameworkName is array<string> -> array<string> -> array<string> -> string -> string -> string = (
+    classpath = list classpathA;
+    srcDirs = list srcDirsA;
+    srcs = list srcsA;
+    //load all the modules
+    mdtsE is list<~YetiDocModuleType>= loadModuleTypes classpath srcDirs srcs;
+    mdts = filter do mt:
+                    mto is ~YetiDocModuleType = mt;
+                    if defined? mto#getException() then
+                        println "Exception during compilation of \(mto#getFileName())";
+                        println mto#getException();
+                        false;
+                    else true fi;
+                  done mdtsE;
+    mts = map do mt:
+                mto is ~YetiDocModuleType = mt;
+                {mt = mto,name = mto#getName(), link = (strReplace "." "$" mto#getName()) ^ ".html"}
+              done mdts;
+
+    //create the side html
+    sideHtml = moduleHtml.modulesNavHtml mts;
+
+    //create the sources
+    var lastHtml = "";
+    for mts do {mt, name, link}:
+        html = moduleHtml.modulePageHtml mt frameworkName sideHtml;
+        //make the file and the directory
+        fl = new File(string targetDir,string link);
+        if not (nullptr? fl#getParent()) then
+            _ = fl#getParentFile()#mkdirs();
+            ()
+        fi;
+        writeFile fl#getPath() "UTF-8" do wr: wr.writeln html done;
+        lastHtml := html;
+    done;
+
+    lastHtml;
+);
+
+writeDocForDir classpathA srcDir targetDir frameworkName is array<string> -> string -> string -> string -> string= (
+
+    srcFiles = findSrcs [] (new File(string srcDir));
+
+    srcDirLength = if (strEnds? srcDir '/') or (strEnds? srcDir '\') then 
+                        strLength srcDir 
+                   else (strLength srcDir) + 1 fi;
+
+    srcs = map do f: fl is ~File = f;
+                    nameF = if File#separator == '\' then
+                        strReplace '\' '/' fl#getPath();
+                    else fl#getPath() fi;
+                    strRight nameF srcDirLength;
+               done srcFiles;
+    writeDocFor classpathA (array [srcDir]) (array srcs) targetDir frameworkName;
+);
+
+
+
+printTest () = (
+    writeDocForDir (array []) "src" "yetiapidoc" "someFramework";
+);
+
+//serverhandler
+serverHandler req out headWriter= (
+    headWriter "200 OK" "text/html";
+    out.write (printTest ());
+);
+
+{
+    serverHandler,
+    writeDocFor,
+    writeDocForDir
+}

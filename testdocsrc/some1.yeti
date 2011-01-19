@@ -1,0 +1,6 @@
+module some1;
+
+//x = load yeti.lang.compiler.repl;
+x = load std;
+
+"hier"

@@ -1,0 +1,171 @@
+module std;
+
+import org.yeticl.map.TMap;
+//import org.slf4j: Logger, LoggerFactory;
+import java.util: List,ListIterator;
+import yeti.lang.Struct;
+
+
+typedef keyMsgType = {.key is string,
+                      .default is string,
+                      .args is ~java.util.List[]}
+
+typedef msgType ={.default is string};
+
+txtMsg default is string -> {.default is string} =
+     {default};
+
+leftMsg msg is msgType -> Left list<msgType> =  Left [msg];
+
+leftTxtMsg default is string -> Left list<msgType> = leftMsg (txtMsg default);
+
+keyMsg key default args =
+   {key,default,args};
+
+mapJavaList mapF javaList is (~Object -> 'a) -> ~List -> list<'a> = (
+    var li = [];
+    it = javaList#listIterator(javaList#size());
+    (it#hasPrevious()) loop (
+        el = mapF it#previous();
+        li := el :: li;
+    );
+    li
+);
+
+lazyMapJavaList mapF javaList is (~Object -> 'a) -> ~List -> list<'a> = (
+    itf it is ~java.util.Iterator -> list<'a> =
+        if it#hasNext() then
+            e = mapF it#next();
+            e :: itf it;
+        else
+            []
+        fi;
+    itf javaList#iterator();
+);
+
+toCallable f = (
+    class RunCallable extends java.lang.Runnable, java.util.concurrent.Callable
+        void run()
+            x = f ();
+            (),
+        Object call()
+            r = f();
+            r unsafely_as ~Object,
+    end;
+    new RunCallable();
+);
+
+//getLogger name is string -> ~Logger = LoggerFactory#getLogger(name);
+
+andThen f g = do x: g(f x) done;
+
+andThenEither f g is ('a-> (Left 'm | Right 'b)) -> ('b-> (Left 'm | Right 'c)) ->  ('a-> (Left 'm | Right 'c)) =
+    do a:
+        case f a of
+          Left m: Left m;
+          Right b:
+            g b;
+        esac
+    done;
+
+toUnit = do _: () done;
+
+headOpt li =
+    if empty? li then None () else Some(head li) fi;
+
+atOpt k hs =
+    if k in hs then Some (hs.[k]) else none fi;
+
+listStarts? start l =
+    if empty? start then
+        true
+    elif empty? l then
+        false
+    elif (head start) != (head l) then
+        false
+    else
+        listStarts? (tail start) (tail l)
+    fi;
+
+either leftF rightF leftOrRight =
+    case leftOrRight of
+      Left v: leftF v;
+      Right x: rightF x;
+    esac;
+
+lazyMaybe default fun opt =
+    case opt of
+        None _: default ();
+        Some v: fun v;
+    esac;
+
+some v is 'a -> (Some 'a | None () )= Some v;
+
+map2index list = (
+    f i l =
+        if empty? l then
+            []
+        else
+            (pair i (head l)) :. \(f (i+1) (tail l));
+        fi;
+     f 0 list;
+);
+
+require msg cond =
+  if not cond then
+    throw new java.lang.IllegalArgumentException("\(msg)");
+  fi;
+
+ensure msg cond =
+  if not cond then
+    throw new java.lang.IllegalStateException("\(msg)");
+  fi;
+
+ensureRight leftOrRight =
+    either do m: throw new java.lang.IllegalStateException("\(m)") done id leftOrRight;
+
+requireRight msg leftOrRight =
+    either do m: throw new java.lang.IllegalArgumentException("\(msg)\(m)") done id leftOrRight;
+
+ensureSome noneOrSome =
+    case noneOrSome of
+        None _ : throw new java.lang.IllegalStateException("None value but value needed");
+        Some v : v;
+    esac;
+
+
+
+
+
+
+{
+    ($) x y = y x,
+    (>>) f g = andThen f g,
+    (&>>) f1 f2 = andThenEither f1 f2,
+
+    txtMsg,
+    leftMsg,
+    leftTxtMsg,
+    keyMsg,
+
+    mapJavaList,
+    lazyMapJavaList,
+    toUnit, 
+    //getLogger,
+    andThen,
+    andThenEither,
+    headOpt,
+    atOpt,
+    either,
+    lazyMaybe,
+    some,
+    map2index,
+    require,
+    ensure,
+    ensureRight,
+    requireRight,
+    ensureSome,
+    listStarts?,
+    toCallable,
+
+}
