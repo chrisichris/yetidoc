@@ -1,6 +1,6 @@
 YetiDoc
 ========
-[Yeti] [http://mth.github.com/yeti/] is ML style functional programming 
+[Yeti](http://mth.github.com/yeti/) is ML style functional programming 
 language, that runs on the JVM.
 
 Currently yeti only provides simple text-output to the console for api-documentation.
@@ -33,12 +33,12 @@ Limitations
 
 Examples:
 ---------
-[yeti.lang.std] [dist/yetidoc/yeti$lang$std.html]
+[yeti.lang.std](dist/yetidoc/yeti$lang$std.html)
 
 Installation
 -------------
-Download the [yetidoc.jar] [dist/yetidoc.jar] and put it together with the 
-latest [yeti.jar][[http://mth.github.com/yeti/] on your classpath.
+Download the [yetidoc.jar](dist/yetidoc.jar) and put it together with the 
+latest [yeti.jar](http://mth.github.com/yeti/) on your classpath.
 
 Ant-Usage
 ---------
@@ -64,8 +64,8 @@ Ant-Usage
  
 Java-Usage
 ----------
-Use the method on class `org.yetidoc.YetiDocJavaApi` [api-doc] [dist/javadoc/org/yetidoc/YetiDocJavaApi.html#writeDocForDir(java.lang.String[], java.lang.String, java.lang.String, java.lang.String)l]
+Use the method on class `org.yetidoc.YetiDocJavaApi` [api-doc](dist/javadoc/org/yetidoc/YetiDocJavaApi.html)
 
 Yeti-Usage
 ----------
-Use the `module org.yetidoc.yetidocapi` see [yeti-api-doc] [dist/yetidoc/org$yetidoc$yetidocApi.html#field_writeDocForDir]
+Use the `module org.yetidoc.yetidocapi` see [yeti-api-doc](dist/yetidoc/org$yetidoc$yetidocApi.html#field_writeDocForDir)
