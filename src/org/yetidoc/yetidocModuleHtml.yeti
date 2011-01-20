@@ -91,9 +91,9 @@ bodyDetailsSruct mt = (
 
     fieldDetailHtml field = (
 '        <h3><a name="field_' ^ field.name ^ '">' ^ field.displayName ^ '</a></h3>
-        <p>' ^ field.doc ^ '</p>
+        <pre class="doc">' ^ field.doc ^ '</pre>
         <!--<div class="codeheader">field-type:</div>-->
-        <pre><code>' ^ field.displayName ^ ' is ' ^ field.type ^ '</code></pre>
+        <pre class="type"><code>' ^ field.displayName ^ ' is ' ^ field.type ^ '</code></pre>
         <hr/>
 '
     );
@@ -109,7 +109,7 @@ bodyDetailsSruct mt = (
 bodyDetails mt = (
     if not mt.struct? then
 '         <h2>Module Type</h2>
-         <pre><code>' ^ mt.typeString ^ '</code></pre>
+         <pre class="type"><code>' ^ mt.typeString ^ '</code></pre>
 '
     else bodyDetailsSruct mt fi
 );
@@ -119,10 +119,10 @@ bodyHtml mt = (
 '        <h1>'^  mt.name ^ if mt.struct? then '<span class="struct-marker"> is structure</span> ' else '' fi ^ '</h1>
         ' ^ if mt.source == "" then 'No source available' else '<a href="#source">sourcecode</a>' fi ^ '
         <h2>Overview</h2>
-        <p>' ^ mt.doc ^ '</p>
+        <pre class="doc">' ^ mt.doc ^ '</pre>
 ' ^ details ^ if mt.source == "" then "" else '
         <h2><a name="source">Source</a></h2>
-        <pre><code>' ^ mt.source ^ '</code></pre>
+        <pre class="type"><code>' ^ mt.source ^ '</code></pre>
 ' fi);
 
 
@@ -137,7 +137,7 @@ htmlForModule mt sideHtml bodyHtml is 'a -> string -> string -> string = (
     <title>' ^ mt.frameworkName ^ ' - Yeti API documentation </title>
     <style type="text/css">
 
-    body {
+    body{
          font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
          line-height: 18px;
     }
@@ -167,7 +167,12 @@ htmlForModule mt sideHtml bodyHtml is 'a -> string -> string -> string = (
     .var-marker {font-size: 80%; color: #666;}
     .struct-marker {font-size: 60%; color: #666;}
 
-    pre {
+    pre.doc {
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    pre.type {
         white-space: pre-wrap;
         white-space: -moz-pre-wrap;
         white-space: -o-pre-wrap;

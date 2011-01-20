@@ -32,8 +32,8 @@ import yeti.lang.MList;
 import yeti.lang.Struct;
 
 
-/*
- * writeDocForDir classpathA srcDir targetDir frameworkName is array<string> -> string -> string -> string -> string=
+/**
+ * Methods to generate yeti-doc html files.
  *
  */
 public class YetiDocJavaApi {
@@ -46,11 +46,22 @@ public class YetiDocJavaApi {
         }
         
     }
-    public static void writeDocForDir(String[] classpath, String srcDir, String targetDir, String frameworkName) {
+    /**
+     * Generates yeti-doc html files in destDir for each *.yeti source file which is found recursively under srcDir
+     * @param classpath the classpath to used to compile the yeti sourcefiles in srcDir. Only needed if the
+     *                  classes are not reachable by the current context-classloader.
+     * @param srcDir directory containing the yeti src files (recursivley scanned). Note that (like
+     *               in Java) module-files must be in the directory of their package and hat the same simple
+     *               name as their file-name.
+     *               ie "module org.foo.xmodule" must be on path "[srcDir]/org/foo/xmodule.yeti"
+     * @param destDir the directory where the html files are written out
+     * @param frameworkName the name of the project - maybe empty
+     */
+    public static void writeDocForDir(String[] classpath, String srcDir, String destDir, String frameworkName) {
         if(classpath == null) classpath = new String[]{};
         Struct st = getStruct();
         //PArray classpathA = new PArray(classpath,0,classpath.length);
         Fun f = (Fun) st.get("writeDocForDir");
-        Object ret = ((Fun)((Fun)((Fun) f.apply(new MList(classpath))).apply(srcDir)).apply(targetDir)).apply(frameworkName);
+        Object ret = ((Fun)((Fun)((Fun) f.apply(new MList(classpath))).apply(srcDir)).apply(destDir)).apply(frameworkName);
     }
 }

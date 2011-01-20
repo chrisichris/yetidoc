@@ -1,4 +1,4 @@
-///Here comes the module documentation
+///Used to generate html api-docs for yeti sources.
 
 /*
  * Copyright (c) 2010,2011 --chris--
@@ -92,6 +92,18 @@ writeDocFor classpathA srcDirsA srcsA targetDir frameworkName is array<string> -
     lastHtml;
 );
 
+/// Generates yeti-doc html files in destDir for each *.yeti source file which is found recursively under srcDir.
+///
+/// USAGE: writeDocForDir classpath srcDir targetDir frameworkName; 
+///
+/// @param classpath the classpath to used to compile the yeti sourcefiles in srcDir. Only needed if the
+///                   classes are not reachable by the current context-classloader.
+/// @param srcDir directory containing the yeti src files (recursivley scanned). Note that (like
+///              in Java) module-files must be in the directory of their package and hat the same simple
+///              name as their file-name.
+///              ie "module org.foo.xmodule" must be on path "[srcDir]/org/foo/xmodule.yeti"
+/// @param destDir the directory where the html files are written out
+/// @param frameworkName the name of the project - maybe empty
 writeDocForDir classpathA srcDir targetDir frameworkName is array<string> -> string -> string -> string -> string= (
 
     srcFiles = findSrcs [] (new File(string srcDir));

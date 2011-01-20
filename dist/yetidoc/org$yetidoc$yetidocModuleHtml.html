@@ -1,0 +1,440 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>anttask - Yeti API documentation </title>
+    <style type="text/css">
+
+    body{
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    h4 {
+        margin: 0;
+    }
+
+    p {
+        margin-top: 3px;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding:0;
+    }
+
+    body{
+        margin:0;
+        padding:0;
+        line-height: 1.5em;
+    }
+
+    b{font-size: 110%;}
+    em{color: red;}
+    .var-marker {font-size: 80%; color: #666;}
+    .struct-marker {font-size: 60%; color: #666;}
+
+    pre.doc {
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    pre.type {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -o-pre-wrap;
+        background: #faf8f0;
+    }
+
+    code {
+        display: block;
+        padding: 0.5em 1em;
+        border: 1px solid #bebab0;
+    }
+    div.codeheader {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    pre.codeheader {
+        margin-top: 3px;
+    }
+
+    #topsection{
+        background: #EAEAEA;
+        height: 90px; /*Height of top section*/
+    }
+
+    #topsection h1{
+        margin: 0;
+        padding-top: 15px;
+    }
+
+    #contentwrapper{
+        float: left;
+        width: 100%;
+    }
+
+    #contentcolumn{
+        margin-left: 200px; /*Set left margin to LeftColumnWidth*/
+        border-left: 5px solid  #EAEAEA;
+    }
+
+    #leftcolumn{
+        float: left;
+        width: 200px; /*Width of left column*/
+        margin-left: -100%;
+        margin-top: 15px;
+        
+        /*background: #C8FC98;*/
+    }
+
+    #footer{
+        clear: left;
+        width: 100%;
+        background: black;
+        color: #FFF;
+        text-align: center;
+        padding: 4px 0;
+    }
+
+    #footer a{
+        color: #FFFF80;
+    }
+
+    .innertube{
+        margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+        margin-top: 0;
+    }
+
+    </style>
+
+
+</head>
+<body>
+<div id="maincontainer">
+    <div id="topsection"><div class="innertube">
+        <h1>Yeti API documentation </h1>
+        <h2>anttask</h2>
+    </div></div>
+
+    <div id="contentwrapper"><div id="contentcolumn"><div class="innertube">
+                <h1>org.yetidoc.yetidocModuleHtml<span class="struct-marker"> is structure</span> </h1>
+        <a href="#source">sourcecode</a>
+        <h2>Overview</h2>
+        <pre class="doc"></pre>
+       <h4>All Fields</h4>
+        <p><a href="#field_modulePageHtml">modulePageHtml</a>, <a href="#field_modulesNavHtml">modulesNavHtml</a></p>
+
+        <h2>Field details</h2><hr/>        <h3><a name="field_modulePageHtml">modulePageHtml</a></h3>
+        <pre class="doc"></pre>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre class="type"><code>modulePageHtml is ~org.yetidoc.YetiDocModuleType -&#62; string -&#62; string -&#62; string</code></pre>
+        <hr/>
+        <h3><a name="field_modulesNavHtml">modulesNavHtml</a></h3>
+        <pre class="doc"></pre>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre class="type"><code>modulesNavHtml is list?&#60;{.link is 'a, .name is 'b}&#62; -&#62; string</code></pre>
+        <hr/>
+
+        <h2><a name="source">Source</a></h2>
+        <pre class="type"><code>/*
+ * Copyright (c) 2010,2011 --chris--
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR &#34;AS IS&#34; AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+module org.yetidoc.yetidocModuleHtml;
+
+import yeti.lang.compiler.YetiDocMaker;
+import java.lang.Character;
+
+
+(@) text =
+    (escape s =
+         &#34;&#38;#\(Character#codePointAt(s.[0] is string, 0));&#34;;
+     strJoin '' (matchAll '[&#60;&#62;&#38;&#34;]' escape id &#34;\(text)&#34;));
+
+
+moduleType mt frameworkName is ~YetiDocModuleType -&#62; string -&#62; 'a = {
+    frameworkName = frameworkName@,
+    javamt = mt,
+    doc = (mt#getDoc())@,
+    source = (mt#getSource())@,
+    typeString = (mt#getTypeString())@,
+    name = (mt#getName())@,
+    fileName = (mt#getFileName())@,
+    struct? = mt#isStruct(),
+
+    fields = (
+        ja = wrapArray (mt#getFields()#toArray());
+        map' do obj:
+                ft = (obj unsafely_as ~Object) unsafely_as ~YetiDocFieldType;
+                {
+                    doc = ft#getDoc()@,
+                    name = ft#getName()@,
+                    type = ft#getType()@,
+                    varField? = ft#isVarField(),
+                    displayName = if ft#isVarField() then '&#60;span class=&#34;var-marker&#34;&#62;var&#60;/span&#62; ' else &#34;&#34; fi ^ (ft#getName()@),
+                    functionField? = ft#isFunctionField(),
+                    finalPartialMember = ft#getFinalPartialMember()@,
+                }
+             done ja;
+    ),
+};
+
+modulesNavHtml nameLinks = (
+    listr = strJoin &#34;\n             &#34;
+            (map do {link,name}: '&#60;li&#62;&#60;a href=&#34;' ^ link ^ '&#34;&#62;' ^ name ^ '&#60;/a&#62;&#60;/li&#62;' done nameLinks);
+
+    html =
+'       &#60;h4&#62;modules&#60;/h4&#62;
+        &#60;ul&#62;' ^ listr ^'&#60;/ul&#62;
+';
+    html
+);
+
+bodyDetailsSruct mt = (
+    sfs = sortBy do f1 f2 : f1.name &#60; f2.name done mt.fields;
+    /*
+    funFields = filter do f:f.functionField? done sfs;
+    valueFields = filter do f: not f.functionField? done sfs;
+    varFields = filter do f: f.varField? done sfs;
+    */
+    fieldSumHtml header fields = if empty? fields then &#34;&#34; else
+        fs = strJoin &#34;, &#34; (map do field: '&#60;a href=&#34;#field_' ^ field.name^'&#34;&#62;' ^ field.displayName ^ '&#60;/a&#62;' done fields);
+'       &#60;h4&#62;' ^ header ^ '&#60;/h4&#62;
+        &#60;p&#62;' ^ fs ^ '&#60;/p&#62;
+'
+    fi;
+
+    fieldDetailHtml field = (
+'        &#60;h3&#62;&#60;a name=&#34;field_' ^ field.name ^ '&#34;&#62;' ^ field.displayName ^ '&#60;/a&#62;&#60;/h3&#62;
+        &#60;pre class=&#34;doc&#34;&#62;' ^ field.doc ^ '&#60;/pre&#62;
+        &#60;!--&#60;div class=&#34;codeheader&#34;&#62;field-type:&#60;/div&#62;--&#62;
+        &#60;pre class=&#34;type&#34;&#62;&#60;code&#62;' ^ field.displayName ^ ' is ' ^ field.type ^ '&#60;/code&#62;&#60;/pre&#62;
+        &#60;hr/&#62;
+'
+    );
+    allFieldsStr = strJoin &#34;&#34; (map fieldDetailHtml mt.fields);
+//    ret = (fieldSumHtml &#34;Var fields&#34; varFields) ^ (fieldSumHtml &#34;Value fields&#34; valueFields) ^ (fieldSumHtml &#34;Function fields&#34; funFields) ^ '
+//        &#60;h2&#62;Field details&#60;/h2&#62;&#60;hr/&#62;' ^ allFieldsStr;
+    ret = (fieldSumHtml &#34;All Fields&#34; sfs) ^ '
+        &#60;h2&#62;Field details&#60;/h2&#62;&#60;hr/&#62;' ^ allFieldsStr;
+    ret
+   
+);
+
+bodyDetails mt = (
+    if not mt.struct? then
+'         &#60;h2&#62;Module Type&#60;/h2&#62;
+         &#60;pre class=&#34;type&#34;&#62;&#60;code&#62;' ^ mt.typeString ^ '&#60;/code&#62;&#60;/pre&#62;
+'
+    else bodyDetailsSruct mt fi
+);
+
+bodyHtml mt = (
+    details = bodyDetails mt;
+'        &#60;h1&#62;'^  mt.name ^ if mt.struct? then '&#60;span class=&#34;struct-marker&#34;&#62; is structure&#60;/span&#62; ' else '' fi ^ '&#60;/h1&#62;
+        ' ^ if mt.source == &#34;&#34; then 'No source available' else '&#60;a href=&#34;#source&#34;&#62;sourcecode&#60;/a&#62;' fi ^ '
+        &#60;h2&#62;Overview&#60;/h2&#62;
+        &#60;pre class=&#34;doc&#34;&#62;' ^ mt.doc ^ '&#60;/pre&#62;
+' ^ details ^ if mt.source == &#34;&#34; then &#34;&#34; else '
+        &#60;h2&#62;&#60;a name=&#34;source&#34;&#62;Source&#60;/a&#62;&#60;/h2&#62;
+        &#60;pre class=&#34;type&#34;&#62;&#60;code&#62;' ^ mt.source ^ '&#60;/code&#62;&#60;/pre&#62;
+' fi);
+
+
+
+
+htmlForModule mt sideHtml bodyHtml is 'a -&#62; string -&#62; string -&#62; string = (
+'&#60;!DOCTYPE html PUBLIC &#34;-//W3C//DTD XHTML 1.0 Transitional//EN&#34;
+&#34;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&#34;&#62;
+&#60;html xmlns=&#34;http://www.w3.org/1999/xhtml&#34; lang=&#34;en&#34; xml:lang=&#34;en&#34;&#62;
+&#60;head&#62;
+    &#60;meta http-equiv=&#34;Content-Type&#34; content=&#34;text/html; charset=iso-8859-1&#34; /&#62;
+    &#60;title&#62;' ^ mt.frameworkName ^ ' - Yeti API documentation &#60;/title&#62;
+    &#60;style type=&#34;text/css&#34;&#62;
+
+    body{
+         font-family: &#34;Lucida Grande&#34;,&#34;Trebuchet MS&#34;,&#34;Bitstream Vera Sans&#34;,Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    h4 {
+        margin: 0;
+    }
+
+    p {
+        margin-top: 3px;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding:0;
+    }
+
+    body{
+        margin:0;
+        padding:0;
+        line-height: 1.5em;
+    }
+
+    b{font-size: 110%;}
+    em{color: red;}
+    .var-marker {font-size: 80%; color: #666;}
+    .struct-marker {font-size: 60%; color: #666;}
+
+    pre.doc {
+         font-family: &#34;Lucida Grande&#34;,&#34;Trebuchet MS&#34;,&#34;Bitstream Vera Sans&#34;,Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    pre.type {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -o-pre-wrap;
+        background: #faf8f0;
+    }
+
+    code {
+        display: block;
+        padding: 0.5em 1em;
+        border: 1px solid #bebab0;
+    }
+    div.codeheader {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    pre.codeheader {
+        margin-top: 3px;
+    }
+
+    #topsection{
+        background: #EAEAEA;
+        height: 90px; /*Height of top section*/
+    }
+
+    #topsection h1{
+        margin: 0;
+        padding-top: 15px;
+    }
+
+    #contentwrapper{
+        float: left;
+        width: 100%;
+    }
+
+    #contentcolumn{
+        margin-left: 200px; /*Set left margin to LeftColumnWidth*/
+        border-left: 5px solid  #EAEAEA;
+    }
+
+    #leftcolumn{
+        float: left;
+        width: 200px; /*Width of left column*/
+        margin-left: -100%;
+        margin-top: 15px;
+        
+        /*background: #C8FC98;*/
+    }
+
+    #footer{
+        clear: left;
+        width: 100%;
+        background: black;
+        color: #FFF;
+        text-align: center;
+        padding: 4px 0;
+    }
+
+    #footer a{
+        color: #FFFF80;
+    }
+
+    .innertube{
+        margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+        margin-top: 0;
+    }
+
+    &#60;/style&#62;
+
+
+&#60;/head&#62;
+&#60;body&#62;
+&#60;div id=&#34;maincontainer&#34;&#62;
+    &#60;div id=&#34;topsection&#34;&#62;&#60;div class=&#34;innertube&#34;&#62;
+        &#60;h1&#62;Yeti API documentation &#60;/h1&#62;
+        &#60;h2&#62;' ^ mt.frameworkName ^'&#60;/h2&#62;
+    &#60;/div&#62;&#60;/div&#62;
+
+    &#60;div id=&#34;contentwrapper&#34;&#62;&#60;div id=&#34;contentcolumn&#34;&#62;&#60;div class=&#34;innertube&#34;&#62;
+        ' ^ bodyHtml ^ '
+    &#60;/div&#62;&#60;/div&#62;&#60;/div&#62;
+
+    &#60;div id=&#34;leftcolumn&#34;&#62;&#60;div class=&#34;innertube&#34;&#62;
+        &#60;!--&#60;b&#62;Left Column: &#60;em&#62;200px&#60;/em&#62;&#60;/b&#62; &#60;script type=&#34;text/javascript&#34;&#62;filltext(15)&#60;/script&#62; --&#62;
+        ' ^ sideHtml ^ '
+    &#60;/div&#62;&#60;/div&#62;
+
+    &#60;div id=&#34;footer&#34;&#62;
+        &#60;a href=&#34;http://mth.github.com/yeti/&#34;&#62;Yeti - home&#60;/a&#62;
+    &#60;/div&#62;
+&#60;/div&#62;
+&#60;/body&#62;
+&#60;/html&#62;'
+
+
+);
+
+{
+    modulePageHtml mt frameworkName modulesNav = (
+        mtt = moduleType mt frameworkName;
+        bh = bodyHtml mtt; //78
+        htmlForModule mtt modulesNav bh;
+    ),
+
+    modulesNavHtml,
+
+}
+</code></pre>
+
+    </div></div></div>
+
+    <div id="leftcolumn"><div class="innertube">
+        <!--<b>Left Column: <em>200px</em></b> <script type="text/javascript">filltext(15)</script> -->
+               <h4>modules</h4>
+        <ul><li><a href="org$yetidoc$yetidocModuleHtml.html">org.yetidoc.yetidocModuleHtml</a></li>
+             <li><a href="org$yetidoc$yetidocApi.html">org.yetidoc.yetidocApi</a></li></ul>
+
+    </div></div>
+
+    <div id="footer">
+        <a href="http://mth.github.com/yeti/">Yeti - home</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <title>anttask - Yeti API documentation </title>
+    <style type="text/css">
+
+    body{
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    h4 {
+        margin: 0;
+    }
+
+    p {
+        margin-top: 3px;
+    }
+
+    ul {
+        list-style: none;
+        margin: 0;
+        padding:0;
+    }
+
+    body{
+        margin:0;
+        padding:0;
+        line-height: 1.5em;
+    }
+
+    b{font-size: 110%;}
+    em{color: red;}
+    .var-marker {font-size: 80%; color: #666;}
+    .struct-marker {font-size: 60%; color: #666;}
+
+    pre.doc {
+         font-family: "Lucida Grande","Trebuchet MS","Bitstream Vera Sans",Verdana,Helvetica,sans-serif;font-size: 14px;
+         line-height: 18px;
+    }
+
+    pre.type {
+        white-space: pre-wrap;
+        white-space: -moz-pre-wrap;
+        white-space: -o-pre-wrap;
+        background: #faf8f0;
+    }
+
+    code {
+        display: block;
+        padding: 0.5em 1em;
+        border: 1px solid #bebab0;
+    }
+    div.codeheader {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    pre.codeheader {
+        margin-top: 3px;
+    }
+
+    #topsection{
+        background: #EAEAEA;
+        height: 90px; /*Height of top section*/
+    }
+
+    #topsection h1{
+        margin: 0;
+        padding-top: 15px;
+    }
+
+    #contentwrapper{
+        float: left;
+        width: 100%;
+    }
+
+    #contentcolumn{
+        margin-left: 200px; /*Set left margin to LeftColumnWidth*/
+        border-left: 5px solid  #EAEAEA;
+    }
+
+    #leftcolumn{
+        float: left;
+        width: 200px; /*Width of left column*/
+        margin-left: -100%;
+        margin-top: 15px;
+        
+        /*background: #C8FC98;*/
+    }
+
+    #footer{
+        clear: left;
+        width: 100%;
+        background: black;
+        color: #FFF;
+        text-align: center;
+        padding: 4px 0;
+    }
+
+    #footer a{
+        color: #FFFF80;
+    }
+
+    .innertube{
+        margin: 10px; /*Margins for inner DIV inside each column (to provide padding)*/
+        margin-top: 0;
+    }
+
+    </style>
+
+
+</head>
+<body>
+<div id="maincontainer">
+    <div id="topsection"><div class="innertube">
+        <h1>Yeti API documentation </h1>
+        <h2>anttask</h2>
+    </div></div>
+
+    <div id="contentwrapper"><div id="contentcolumn"><div class="innertube">
+                <h1>org.yetidoc.yetidocApi<span class="struct-marker"> is structure</span> </h1>
+        <a href="#source">sourcecode</a>
+        <h2>Overview</h2>
+        <pre class="doc">Used to generate html api-docs for yeti sources.</pre>
+       <h4>All Fields</h4>
+        <p><a href="#field_serverHandler">serverHandler</a>, <a href="#field_writeDocFor">writeDocFor</a>, <a href="#field_writeDocForDir">writeDocForDir</a></p>
+
+        <h2>Field details</h2><hr/>        <h3><a name="field_serverHandler">serverHandler</a></h3>
+        <pre class="doc"></pre>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre class="type"><code>serverHandler is 'a -&#62; {.write is string -&#62; 'b} -&#62; (string -&#62; string -&#62; ()) -&#62; 'b</code></pre>
+        <hr/>
+        <h3><a name="field_writeDocFor">writeDocFor</a></h3>
+        <pre class="doc"></pre>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre class="type"><code>writeDocFor is array&#60;string&#62; -&#62; array&#60;string&#62; -&#62; array&#60;string&#62; -&#62; string -&#62; string -&#62; string</code></pre>
+        <hr/>
+        <h3><a name="field_writeDocForDir">writeDocForDir</a></h3>
+        <pre class="doc">Generates yeti-doc html files in destDir for each *.yeti source file which is found recursively under srcDir.
+
+ USAGE: writeDocForDir classpath srcDir targetDir frameworkName; 
+
+ @param classpath the classpath to used to compile the yeti sourcefiles in srcDir. Only needed if the
+                   classes are not reachable by the current context-classloader.
+ @param srcDir directory containing the yeti src files (recursivley scanned). Note that (like
+              in Java) module-files must be in the directory of their package and hat the same simple
+              name as their file-name.
+              ie &#34;module org.foo.xmodule&#34; must be on path &#34;[srcDir]/org/foo/xmodule.yeti&#34;
+ @param destDir the directory where the html files are written out
+ @param frameworkName the name of the project - maybe empty</pre>
+        <!--<div class="codeheader">field-type:</div>-->
+        <pre class="type"><code>writeDocForDir is array&#60;string&#62; -&#62; string -&#62; string -&#62; string -&#62; string</code></pre>
+        <hr/>
+
+        <h2><a name="source">Source</a></h2>
+        <pre class="type"><code>///Used to generate html api-docs for yeti sources.
+
+/*
+ * Copyright (c) 2010,2011 --chris--
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. The name of the author may not be used to endorse or promote products
+ *    derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR &#34;AS IS&#34; AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+module org.yetidoc.yetidocApi;
+
+
+import yeti.lang.compiler.YetiDocMaker;
+import java.io.File;
+
+
+
+moduleHtml = load org.yetidoc.yetidocModuleHtml;
+
+findSrcs found src is list&#60;~File&#62; -&#62; ~File -&#62; list&#60;~File&#62; = (
+    if src#isDirectory() then
+        files = wrapArray (src#listFiles());
+        fold findSrcs found files;
+    elif strEnds? src#getName() &#34;.yeti&#34; then
+        src :: found;
+    else
+        found;
+    fi;
+);
+
+loadModuleTypes classpath srcDirs  srcs is list&#60;string&#62; -&#62; list&#60;string&#62; -&#62; list&#60;string&#62; -&#62; list&#60;~YetiDocModuleType&#62;= (
+    arj = YetiDocMaker#docForSrcs(array srcDirs,array classpath, array srcs);
+    list (wrapArray arj)
+);
+
+writeDocFor classpathA srcDirsA srcsA targetDir frameworkName is array&#60;string&#62; -&#62; array&#60;string&#62; -&#62; array&#60;string&#62; -&#62; string -&#62; string -&#62; string = (
+    classpath = list classpathA;
+    srcDirs = list srcDirsA;
+    srcs = list srcsA;
+    //load all the modules
+    mdtsE is list&#60;~YetiDocModuleType&#62;= loadModuleTypes classpath srcDirs srcs;
+    mdts = filter do mt:
+                    mto is ~YetiDocModuleType = mt;
+                    if defined? mto#getException() then
+                        println &#34;Exception during compilation of \(mto#getFileName())&#34;;
+                        println mto#getException();
+                        false;
+                    else true fi;
+                  done mdtsE;
+    mts = map do mt:
+                mto is ~YetiDocModuleType = mt;
+                {mt = mto,name = mto#getName(), link = (strReplace &#34;.&#34; &#34;$&#34; mto#getName()) ^ &#34;.html&#34;}
+              done mdts;
+
+    //create the side html
+    sideHtml = moduleHtml.modulesNavHtml mts;
+
+    //create the sources
+    var lastHtml = &#34;&#34;;
+    for mts do {mt, name, link}:
+        html = moduleHtml.modulePageHtml mt frameworkName sideHtml;
+        //make the file and the directory
+        fl = new File(string targetDir,string link);
+        if not (nullptr? fl#getParent()) then
+            _ = fl#getParentFile()#mkdirs();
+            ()
+        fi;
+        writeFile fl#getPath() &#34;UTF-8&#34; do wr: wr.writeln html done;
+        lastHtml := html;
+    done;
+
+    lastHtml;
+);
+
+/// Generates yeti-doc html files in destDir for each *.yeti source file which is found recursively under srcDir.
+///
+/// USAGE: writeDocForDir classpath srcDir targetDir frameworkName; 
+///
+/// @param classpath the classpath to used to compile the yeti sourcefiles in srcDir. Only needed if the
+///                   classes are not reachable by the current context-classloader.
+/// @param srcDir directory containing the yeti src files (recursivley scanned). Note that (like
+///              in Java) module-files must be in the directory of their package and hat the same simple
+///              name as their file-name.
+///              ie &#34;module org.foo.xmodule&#34; must be on path &#34;[srcDir]/org/foo/xmodule.yeti&#34;
+/// @param destDir the directory where the html files are written out
+/// @param frameworkName the name of the project - maybe empty
+writeDocForDir classpathA srcDir targetDir frameworkName is array&#60;string&#62; -&#62; string -&#62; string -&#62; string -&#62; string= (
+
+    srcFiles = findSrcs [] (new File(string srcDir));
+
+    srcDirLength = if (strEnds? srcDir '/') or (strEnds? srcDir '\') then 
+                        strLength srcDir 
+                   else (strLength srcDir) + 1 fi;
+
+    srcs = map do f: fl is ~File = f;
+                    nameF = if File#separator == '\' then
+                        strReplace '\' '/' fl#getPath();
+                    else fl#getPath() fi;
+                    strRight nameF srcDirLength;
+               done srcFiles;
+    writeDocFor classpathA (array [srcDir]) (array srcs) targetDir frameworkName;
+);
+
+
+
+printTest () = (
+    writeDocForDir (array []) &#34;src&#34; &#34;yetiapidoc&#34; &#34;someFramework&#34;;
+);
+
+//serverhandler
+serverHandler req out headWriter= (
+    headWriter &#34;200 OK&#34; &#34;text/html&#34;;
+    out.write (printTest ());
+);
+
+{
+    serverHandler,
+    writeDocFor,
+    writeDocForDir
+}
+</code></pre>
+
+    </div></div></div>
+
+    <div id="leftcolumn"><div class="innertube">
+        <!--<b>Left Column: <em>200px</em></b> <script type="text/javascript">filltext(15)</script> -->
+               <h4>modules</h4>
+        <ul><li><a href="org$yetidoc$yetidocModuleHtml.html">org.yetidoc.yetidocModuleHtml</a></li>
+             <li><a href="org$yetidoc$yetidocApi.html">org.yetidoc.yetidocApi</a></li></ul>
+
+    </div></div>
+
+    <div id="footer">
+        <a href="http://mth.github.com/yeti/">Yeti - home</a>
+    </div>
+</div>
+</body>
+</html>
