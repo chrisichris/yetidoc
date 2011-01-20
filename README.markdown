@@ -31,13 +31,13 @@ Limitations
 - only for modules which return structs detailed documentation is generated for other modules only the type is reported.  
 - very little customization possibilities
 
-Examples:
+Example:
 ---------
-[yeti.lang.std](dist/yetidoc/yeti$lang$std.html)
+[yeti.lang.std](http://chrisichris.github.com/yetidoc/dist/yetidoc/yeti$lang$std.html)
 
 Installation
 -------------
-Download the [yetidoc.jar](dist/yetidoc.jar) and put it together with the 
+Download the [yetidoc.jar](http://chrisichris.github.com/yetidoc/dist/yetidoc.jar) and put it together with the 
 latest [yeti.jar](http://mth.github.com/yeti/) on your classpath.
 
 Ant-Usage
@@ -64,8 +64,8 @@ Ant-Usage
  
 Java-Usage
 ----------
-Use the method on class `org.yetidoc.YetiDocJavaApi` [api-doc](dist/javadoc/org/yetidoc/YetiDocJavaApi.html)
+Use the method on class `org.yetidoc.YetiDocJavaApi` [api-doc](http://chrisichris.github.com/yetidoc/dist/javadoc/org/yetidoc/YetiDocJavaApi.html)
 
 Yeti-Usage
 ----------
-Use the `module org.yetidoc.yetidocapi` see [yeti-api-doc](dist/yetidoc/org$yetidoc$yetidocApi.html#field_writeDocForDir)
+Use the `module org.yetidoc.yetidocapi` see [yeti-api-doc](http://chrisichris.github.com/yetidoc/dist/yetidoc/org$yetidoc$yetidocApi.html#field_writeDocForDir)
