@@ -28,7 +28,8 @@
         <pathelement location="${build-dir}" />
         <!-- libraries -->
         <fileset dir="${lib-dir}">
-            <include name="*.jar" />
+            <include name="junit-3.8.1.jar" />
+            <include name="yeti.jar" />
         </fileset>
     </path>
 
