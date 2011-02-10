@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.yeti</groupId>
-  <artifactId>yetidoc</artifactId>
-  <packaging>jar</packaging>
-  <version>0.1-SNAPSHOT</version>
-  <name>${project.artifactId}</name>
- 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.yeti</groupId>
+    <artifactId>yetidoc</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <name>${project.artifactId}</name>
+
     <url>http://chrisichris.github.com/${project.artifactId}</url>
     <description>The api-documentation generator for yeti files.</description>
     <inceptionYear>2011</inceptionYear>
@@ -23,26 +23,25 @@
         </license>
     </licenses>
 
-    <!--
-  <scm>
-    <connection>scm:git:git://github.com/chrisichris/${project.artifactId}.git</connection>
-    <developerConnection>scm:git:git@github.com:chrisichris/${project.artifactId}.git</developerConnection>
-    <url>http://github.com/chrisichris/${project.artifactId}/</url>
-  </scm>
+    <scm>
+        <connection>scm:git:git://github.com/chrisichris/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:git@github.com:chrisichris/${project.artifactId}.git</developerConnection>
+        <url>http://github.com/chrisichris/${project.artifactId}/</url>
+    </scm>
 
-  <issueManagement>
-    <system>github</system>
-    <url>http://github.com/chrisichris/${project.artifactId}/issues#issue/</url>
-  </issueManagement>
+    <issueManagement>
+        <system>github</system>
+        <url>http://github.com/chrisichris/${project.artifactId}/issues#issue/</url>
+    </issueManagement>
 
-  <mailingLists>
-    <mailingList>
-      <name>yeti-maven-plugin</name>
-      <archive>http://groups.google.com/group/yeti-lang</archive>
-      <post>http://groups.google.com/group/yeti-lang</post>
-    </mailingList>
-  </mailingLists> -->
- 
+    <mailingLists>
+        <mailingList>
+            <name>yeti-lang</name>
+            <archive>http://groups.google.com/group/yeti-lang</archive>
+            <post>http://groups.google.com/group/yeti-lang</post>
+        </mailingList>
+    </mailingLists>
+
     <developers>
         <developer>
             <name>Chrisian Essl</name>
@@ -62,7 +61,7 @@
         <encoding>UTF-8</encoding>
     </properties>
 
- <repositories>
+    <repositories>
         <repository>
             <id>chrisis.snapshots</id>
             <name>chrisis-maven-repo</name>
@@ -70,26 +69,26 @@
         </repository>
     </repositories>
 
- <dependencies>
-      <dependency>
-          <groupId>org.yeti</groupId>
-          <artifactId>yeti</artifactId>
-          <version>0.1-SNAPSHOT</version>
-          <scope>provided</scope>
-      </dependency>
-	  <dependency>
-		  <groupId>org.apache.ant</groupId>
-  		  <artifactId>ant</artifactId>
- 		  <version>1.8.0</version>
-          <scope>provided</scope>
-	   </dependency>     
-	   <dependency>
-		  <groupId>junit</groupId>
-		  <artifactId>junit</artifactId>
-		  <version>3.8.1</version>
-		  <scope>test</scope>
-       </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>org.yeti</groupId>
+            <artifactId>yeti</artifactId>
+            <version>0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
