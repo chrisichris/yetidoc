@@ -42,6 +42,33 @@
       <post>http://groups.google.com/group/yeti-lang</post>
     </mailingList>
   </mailingLists> -->
+ 
+    <developers>
+        <developer>
+            <name>Chrisian Essl</name>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <!--
+  <contributors>
+    <contributor>
+      <name>xxx</name>
+    </contributor>
+  </contributors>
+-->
+
+    <properties>
+        <encoding>UTF-8</encoding>
+    </properties>
+
+ <repositories>
+        <repository>
+            <id>chrisis.snapshots</id>
+            <name>chrisis-maven-repo</name>
+            <url>http://chrisichris.github.com/chrisis-maven-repo/snapshots</url>
+        </repository>
+    </repositories>
 
  <dependencies>
       <dependency>
@@ -51,9 +78,9 @@
           <scope>provided</scope>
       </dependency>
 	  <dependency>
-		  <groupId>ant</groupId>
-  		  <artifactId>ant-nodeps</artifactId>
- 		  <version>1.6.5</version>
+		  <groupId>org.apache.ant</groupId>
+  		  <artifactId>ant</artifactId>
+ 		  <version>1.8.0</version>
           <scope>provided</scope>
 	   </dependency>     
 	   <dependency>
