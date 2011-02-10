@@ -28,6 +28,7 @@
 package yeti.lang.compiler;
 
 
+import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import org.yetidoc.*;
 
@@ -64,8 +65,28 @@ public class YeticlDocMakerTest extends TestCase {
         }
     }
 
-    public void testYetiDoc() throws Exception {
-        YetiDocJavaApi.writeDocForDir(new String[]{},"src/testdocsrc","target/unittestdocssrc","");
+    public void testYetiDocForDir() throws Exception {
+        YetiDocJavaApi.writeDocForDir(new String[]{},"src/testdocsrc","target/unittestdocssrc/yetidocfordir","");
     }
+
+    public void testYetiDoc() throws Exception {
+        YetiDocJavaApi.writeDocFor(null,new String[]{"src/testdocsrc"},
+                new String[]{"yeti/lang/std.yeti","some1.yeti"},
+                "target/unittestdocssrc/yetidoc","");
+    }
+
+    public void testApp() throws Exception {
+        String[] args = new String[]{
+          "-d","target/unittestdocssrc/app",
+          "-sd","src/testdocsrc",
+          "-fm","testApp",
+          "yeti/lang/std.yeti","some1.yeti"
+        };
+
+        Class cl = this.getClass().getClassLoader().loadClass("org.yetidoc.yetidoc");
+        Method m = cl.getMethod("main", String[].class);
+        m.invoke(null,(Object)args);
+    }
+
 
 }

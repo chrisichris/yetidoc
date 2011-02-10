@@ -64,4 +64,20 @@ public class YetiDocJavaApi {
         Fun f = (Fun) st.get("writeDocForDir");
         Object ret = ((Fun)((Fun)((Fun) f.apply(new MList(classpath))).apply(srcDir)).apply(destDir)).apply(frameworkName);
     }
+
+    public static void writeDocFor(String[] classpath, String[] srcDirs, String[] srcs, String destDir, String frameworkName) {
+        classpath = classpath == null ? new String[]{}:classpath;
+        srcDirs = srcDirs == null ? new String[]{}:srcDirs;
+
+        MList cp = new MList(classpath);
+        MList sd = new MList(srcDirs);
+        MList sr = new MList(srcs);
+
+        Struct st = getStruct();
+        Fun f= (Fun) st.get("writeDocFor");
+        Object ret = ((Fun)((Fun)((Fun)((Fun)f.apply(cp)).apply(sd)).apply(sr)).apply(destDir)).apply(frameworkName);
+
+    }
+
+
 }

@@ -32,36 +32,44 @@ import java.io.File;
 argv = array _argv;
 
 printHelp () = (
-    println "yetidoc sourcedirectory targetdirectory [-flags]\n\n";
+    println "yetidoc [-flags] srcfilenames \n\n";
     println "  -help         print this help";
-    println "  -fm           the framework name to use in the doc";
     println "  -cp           the classpath used to compile the sources";
+    println "  -d            destination directory";
+    println "  -sd           source directories";
+    println "  -fm           the framework name to use in the doc";
 );
 
-if (length argv) < 2 then
+if (length argv) < 1 then
     printHelp();
     ()
 else
-    srcDir = shift argv;
-    targetDir = shift argv;
+    var sourceDirs is array<string> = array [];
     var frameworkName = "";
     var classpath is array<string>= array [];
+    var targetDir = "";
+    var srcs is array<string> = array [];
 
 
     (not (empty? argv)) loop (
         arg = shift argv;
         if strStarts? arg '-' then
             case arg of
-                "-fm" : frameworkName := shift argv;
-                "-cp" : classpath := (strSplit File#pathSeparator (shift argv));
                 "-help" :printHelp();
-                _ : ();
+                "-cp" : classpath := (strSplit File#pathSeparator (shift argv));
+                "-d"  : targetDir := shift argv;
+                "-sd" : sourceDirs := (strSplit File#pathSeparator (shift argv));
+                "-fm" : frameworkName := shift argv;
+                _ :  println "Unexpected option: \(arg)";
+                     sysExit 1;
             esac;
+        else
+            push srcs arg;
         fi;
     );
 
     api = load org.yetidoc.yetidocApi;
-    _ = api.writeDocForDir classpath srcDir targetDir frameworkName;
+    _ = api.writeDocFor classpath sourceDirs srcs targetDir frameworkName;
     ()
 fi;
 
