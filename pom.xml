@@ -1,0 +1,116 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.yeti</groupId>
+  <artifactId>yetidoc</artifactId>
+  <packaging>jar</packaging>
+  <version>0.1-SNAPSHOT</version>
+  <name>${project.artifactId}</name>
+ 
+    <url>http://chrisichris.github.com/${project.artifactId}</url>
+    <description>The api-documentation generator for yeti files.</description>
+    <inceptionYear>2011</inceptionYear>
+    <organization>
+        <name>yeti</name>
+        <url>http://mth.github.com/yeti/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>the Apache License, ASL Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!--
+  <scm>
+    <connection>scm:git:git://github.com/chrisichris/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:git@github.com:chrisichris/${project.artifactId}.git</developerConnection>
+    <url>http://github.com/chrisichris/${project.artifactId}/</url>
+  </scm>
+
+  <issueManagement>
+    <system>github</system>
+    <url>http://github.com/chrisichris/${project.artifactId}/issues#issue/</url>
+  </issueManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>yeti-maven-plugin</name>
+      <archive>http://groups.google.com/group/yeti-lang</archive>
+      <post>http://groups.google.com/group/yeti-lang</post>
+    </mailingList>
+  </mailingLists> -->
+
+ <dependencies>
+      <dependency>
+          <groupId>org.yeti</groupId>
+          <artifactId>yeti</artifactId>
+          <version>0.1-SNAPSHOT</version>
+          <scope>provided</scope>
+      </dependency>
+	  <dependency>
+		  <groupId>ant</groupId>
+  		  <artifactId>ant-nodeps</artifactId>
+ 		  <version>1.6.5</version>
+          <scope>provided</scope>
+	   </dependency>     
+	   <dependency>
+		  <groupId>junit</groupId>
+		  <artifactId>junit</artifactId>
+		  <version>3.8.1</version>
+		  <scope>test</scope>
+       </dependency>
+  </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <taskdef name="yetic" classname="yeti.lang.compiler.YetiTask"
+                                         classpathref="maven.plugin.classpath"/>
+
+
+                                <yetic srcdir="src/main/java/org/yetidoc" destdir="target/classes"
+                                       includes="**/*.yeti" excludes=""
+                                       preload="yeti/lang/std:yeti/lang/io">
+                                    <classpath  refid="maven.test.classpath"/>
+                                </yetic>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.yeti</groupId>
+                        <artifactId>yeti</artifactId>
+                        <version>0.1-SNAPSHOT</version>
+                    </dependency>
+
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

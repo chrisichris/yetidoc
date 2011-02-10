@@ -54,9 +54,9 @@ public class YeticlDocMakerTest extends TestCase {
      * Test of docForSrcs method, of class YetiDocMaker.
      */
     public void testDocForSrcs() throws Exception {
-        System.out.println("Pathi: " +(new java.io.File(".")).getAbsolutePath());
+        System.out.println("Path: " +(new java.io.File(".")).getAbsolutePath());
         //YetiDocModuleType[] mta = YetiDocMaker.docForSrcs(new String[]{}, new String[]{}, new String[]{"yeti/lang/compiler/repl.yeti"});
-        YetiDocModuleType[] mta = YetiDocMaker.docForSrcs(new String[]{"C:/programmierung/myprojects/yeti/yetidoc/testdocsrc"}, new String[]{}, new String[]{"std.yeti"});
+        YetiDocModuleType[] mta = YetiDocMaker.docForSrcs(new String[]{"src/testdocsrc/"}, new String[]{}, new String[]{"std.yeti"});
         assertEquals (mta.length,1);
         if(mta[0].getException() != null) {
             mta[0].getException().printStackTrace();
@@ -65,7 +65,7 @@ public class YeticlDocMakerTest extends TestCase {
     }
 
     public void testYetiDoc() throws Exception {
-        YetiDocJavaApi.writeDocForDir(new String[]{},"testdocsrc","testdocs/junit","");
+        YetiDocJavaApi.writeDocForDir(new String[]{},"src/testdocsrc","target/unittestdocssrc","");
     }
 
 }
