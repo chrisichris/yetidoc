@@ -55,7 +55,7 @@ loadModuleTypes classpath srcDirs  srcs is list<string> -> list<string> -> list<
 
 writeDocFor classpathA srcDirsA srcsA targetDir frameworkName is array<string> -> array<string> -> array<string> -> string -> string -> string = (
     classpath = list classpathA;
-    srcDirs = list srcDirsA;
+    srcDirs = map' do str: strReplace File#separator "/" str done srcDirsA;
     srcs = list srcsA;
     //load all the modules
     mdtsE is list<~YetiDocModuleType>= loadModuleTypes classpath srcDirs srcs;
@@ -113,9 +113,7 @@ writeDocForDir classpathA srcDir targetDir frameworkName is array<string> -> str
                    else (strLength srcDir) + 1 fi;
 
     srcs = map do f: fl is ~File = f;
-                    nameF = if File#separator == '\' then
-                        strReplace '\' '/' fl#getPath();
-                    else fl#getPath() fi;
+                    nameF = fl#getPath();
                     strRight nameF srcDirLength;
                done srcFiles;
     writeDocFor classpathA (array [srcDir]) (array srcs) targetDir frameworkName;

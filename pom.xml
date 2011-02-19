@@ -61,6 +61,20 @@
         <encoding>UTF-8</encoding>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>chrisis-local-releases</id>
+            <name>Maven2 local repository for git clone releases</name>
+            <url>file:///${basedir}/../../chrisis-maven-repo/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>chrisis-local-snapshots</id>
+            <name>Maven2 local repository for git clone snapshots</name>
+            <url>file:///${basedir}/../../chrisis-maven-repo/snapshots/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>chrisis.snapshots</id>
@@ -74,7 +88,6 @@
             <groupId>org.yeti</groupId>
             <artifactId>yeti</artifactId>
             <version>0.1-SNAPSHOT</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.ant</groupId>

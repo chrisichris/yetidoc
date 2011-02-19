@@ -28,6 +28,7 @@
 package yeti.lang.compiler;
 
 
+import java.io.File;
 import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import org.yetidoc.*;
@@ -65,14 +66,29 @@ public class YeticlDocMakerTest extends TestCase {
         }
     }
 
+    private void assertFiles(String dir,String[] files) {
+        File df = new File(dir);
+        for(String p:files) {
+            File f = new File(df,p +".html");
+            assertTrue("File does not exist:"+f.getAbsolutePath(), f.exists());
+        }
+    }
     public void testYetiDocForDir() throws Exception {
         YetiDocJavaApi.writeDocForDir(new String[]{},"src/testdocsrc","target/unittestdocssrc/yetidocfordir","");
+
+        assertFiles("target/unittestdocssrc/yetidocfordir",new String[]{
+            "some","some1","std","yeti$http","yeti$lang$compiler$repl","yeti$lang$std"
+        });
+
     }
 
     public void testYetiDoc() throws Exception {
         YetiDocJavaApi.writeDocFor(null,new String[]{"src/testdocsrc"},
                 new String[]{"yeti/lang/std.yeti","some1.yeti"},
                 "target/unittestdocssrc/yetidoc","");
+        assertFiles("target/unittestdocssrc/yetidoc",new String[]{
+            "some1","yeti$lang$std"
+        });
     }
 
     public void testApp() throws Exception {
@@ -86,6 +102,10 @@ public class YeticlDocMakerTest extends TestCase {
         Class cl = this.getClass().getClassLoader().loadClass("org.yetidoc.yetidoc");
         Method m = cl.getMethod("main", String[].class);
         m.invoke(null,(Object)args);
+
+        assertFiles("target/unittestdocssrc/app",new String[]{
+            "some1","yeti$lang$std"
+        });
     }
 
 

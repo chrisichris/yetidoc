@@ -27,6 +27,7 @@
 
 package yeti.lang.compiler;
 
+import java.io.File;
 import org.yetidoc.YetiDocModuleType;
 import org.yetidoc.YetiDocFieldType;
 import java.io.IOException;
@@ -78,7 +79,7 @@ public class YetiDocMaker {
             ModuleType mt = YetiTypeVisitor.getType(null, fileName, true);
 
             doc = mt.topDoc == null ? "" : mt.topDoc;
-            name = fileName.substring(0,fileName.lastIndexOf('.')).replace('/', '.');
+            name = fileName.substring(0,fileName.lastIndexOf('.')).replace('/','.').replace(File.separatorChar, '.');
             //name = fileName.replace('/', '.');
 
             typeString = mt.type.toString();
