@@ -1,5 +1,8 @@
 YetiDoc
 ========
+
+* note this project is not maintained anymore use the build in doc facility of yeti*
+
 [Yeti](http://mth.github.com/yeti/) is ML style functional programming 
 language, that runs on the JVM.
 
